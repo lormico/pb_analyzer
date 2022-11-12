@@ -1,20 +1,24 @@
-import pprint
-
-from pb_analyzer import load_config, get_user_cookies, get_prices
+from pb_analyzer import load_config, get_stations, get_prices
 
 
 def main():
     config = load_config()
-    user_cookies = get_user_cookies(config["username"], config["password"])
-    prices = get_prices(user_cookies,
-                        config["min_lat"],
+    stations = get_stations(config["min_lat"],
+                            config["min_long"],
+                            config["max_lat"],
+                            config["max_long"])
+    print(f"found {len(stations)} stations")
+
+    prices = get_prices(config["min_lat"],
                         config["min_long"],
                         config["max_lat"],
-                        config["max_long"],
-                        config["fuels"])
+                        config["max_long"])
 
-    pp = pprint.PrettyPrinter()
-    pp.pprint(dict([(station['price'], (station['name'], station['last_update'])) for station in prices]))
+    for price in sorted(prices, key=lambda p: p['date'], reverse=True):
+        if price["fuel"] != config["fuel"]:
+            continue
+        station = stations[price["station"]]
+        print(f"{station['name']} ({station['address']}): {price['price']} {price['service']} ({price['date']})")
 
 
 if __name__ == "__main__":

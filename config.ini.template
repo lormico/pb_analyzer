@@ -1,10 +1,6 @@
-[USER]
-username =
-password =
-
 [SEARCH]
 min_lat =
 min_long =
 max_lat =
 max_long =
-fuels =
+fuel =

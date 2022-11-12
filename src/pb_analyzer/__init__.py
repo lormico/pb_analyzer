@@ -1,55 +1,70 @@
 import configparser
-import datetime
-import urllib.parse
+from typing import Dict, List
 
 import requests
-from requests import PreparedRequest
 
-BASE_URL = "https://www.prezzibenzina.it/www2/develop/tech/handlers/"
+API_URL = "https://api3.prezzibenzina.it/"
 DEFAULT_CONFIG_FILE = "../../config.ini"
-COMMON_HEADERS = {
-    "X-Requested-With": "XMLHttpRequest",
-}
+
+JsonObject = Dict[str, str]
 
 
 def load_config(config_file=DEFAULT_CONFIG_FILE):
     config = configparser.ConfigParser()
     config.read(config_file)
-    return dict(config["USER"]) | dict(config["SEARCH"])
+    return dict(config["SEARCH"])
 
 
-def get_user_cookies(username, password):
-    request = PreparedRequest()
-    url = urllib.parse.urljoin(BASE_URL, "user_handler.php")
+def get_stations(min_lat, min_long, max_lat, max_long) -> Dict[str, JsonObject]:
+    """
+    TODO iterate if limit is reached
+
+    :param min_lat:
+    :param min_long:
+    :param max_lat:
+    :param max_long:
+    :return:
+    """
+    request = requests.PreparedRequest()
+    url = API_URL
     params = {
-        "sel": "login",
-        "user": username,
-        "pass": password,
-        "rand": int(datetime.datetime.now().timestamp() * 1000)
-    }
-    headers = COMMON_HEADERS
-
-    request.prepare_url(url, params)
-    response = requests.get(request.url, headers=headers, verify=False)
-    if response.text and response.cookies:
-        return response.cookies.get_dict()
-
-
-def get_prices(user_cookies, min_lat, min_long, max_lat, max_long, fuel):
-    request = PreparedRequest()
-    url = urllib.parse.urljoin(BASE_URL, "search_handler.php")
-    params = {
-        "sel": "getStationsTab",
+        "do": "pb_get_stations",
+        "output": "json",
+        "limit": "500",
+        "appname": "AndroidFuel",
         "min_lat": min_lat,
         "min_long": min_long,
         "max_lat": max_lat,
         "max_long": max_long,
-        "brand": None,
-        "fuels": fuel,
-        "rand": int(datetime.datetime.now().timestamp() * 1000)
     }
-    headers = COMMON_HEADERS
-
     request.prepare_url(url, params)
-    response = requests.get(request.url, headers=headers, cookies=user_cookies, verify=False)
-    return response.json()
+    response = requests.post(request.url, verify=False)
+    station_list = response.json()['pb_get_stations']['stations']['station']
+    return dict([(station['id'], station) for station in station_list])
+
+
+def get_prices(min_lat, min_long, max_lat, max_long) -> List[JsonObject]:
+    """
+    TODO
+
+    :param min_lat:
+    :param min_long:
+    :param max_lat:
+    :param max_long:
+    :return:
+    """
+    request = requests.PreparedRequest()
+    url = API_URL
+    params = {
+        "do": "pb_get_prices",
+        "output": "json",
+        "limit": "500",
+        "appname": "AndroidFuel",
+        "min_lat": min_lat,
+        "min_long": min_long,
+        "max_lat": max_lat,
+        "max_long": max_long,
+    }
+    request.prepare_url(url, params)
+    response = requests.post(request.url, verify=False)
+    return response.json()['pb_get_prices']['prices']['price']
