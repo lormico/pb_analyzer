@@ -1,0 +1,16 @@
+[project]
+name = "pb_analyzer"
+dynamic = ["version"]
+dependencies = [
+    "requests",
+]
+
+[project.scripts]
+pb_analyzer = "pb_analyzer.__main__:main"
+
+[tool.pdm]
+version = { source = "scm" }
+
+[build-system]
+requires = ["pdm-pep517>=1.0.0"]
+build-backend = "pdm.pep517.api"
