@@ -26,20 +26,24 @@ def main():
             last_updated = datetime.datetime.strptime(last_updated, "%Y-%m-%d %H:%M:%S")
             logger.debug(f"Last update: {last_updated}")
 
+        # Look for station updates 6 hours since last update
+        # May produce duplicates on db, but it's ok, they will be handled
+        # Doing this since the API wouldn't return data if filtered too strictly
         stations = get_stations(config["SEARCH"]["min_lat"],
                                 config["SEARCH"]["min_long"],
                                 config["SEARCH"]["max_lat"],
                                 config["SEARCH"]["max_long"],
-                                last_updated)
+                                last_updated - datetime.timedelta(hours=6))
         logger.info(f"Found {len(stations)} stations")
         if stations:
             upsert_stations(db_session, stations)
 
+        # Same as above
         prices = get_prices(config["SEARCH"]["min_lat"],
                             config["SEARCH"]["min_long"],
                             config["SEARCH"]["max_lat"],
                             config["SEARCH"]["max_long"],
-                            last_updated)
+                            last_updated - datetime.timedelta(hours=6))
         logger.info(f"Found {len(prices)} prices")
         if prices:
             insert_prices(db_session, prices)

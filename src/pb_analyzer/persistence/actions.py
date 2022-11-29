@@ -47,7 +47,7 @@ def insert_prices(session: Session, prices: List[JsonObject]):
             price=float(price['price']),
         ))
 
-    statement = insert(Price).values(values)
+    statement = insert(Price).prefix_with("OR IGNORE").values(values)
     session.execute(statement)
 
 
