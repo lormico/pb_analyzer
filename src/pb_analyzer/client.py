@@ -1,5 +1,6 @@
 from typing import Dict, List
 
+from loguru import logger
 import requests
 
 API_URL = "https://api3.prezzibenzina.it/"
@@ -34,6 +35,7 @@ def get_stations(min_lat, min_long, max_lat, max_long, updated_since=False) -> D
         params['upd_from'] = updated_since
 
     request.prepare_url(url, params)
+    logger.debug(f"get_stations url = {request.url}")
     response_json = requests.post(request.url).json()
     status = response_json['pb_get_stations']['status']
     if status == "error":
@@ -70,6 +72,7 @@ def get_prices(min_lat, min_long, max_lat, max_long, updated_since=False) -> Lis
         params['upd_from'] = updated_since
 
     request.prepare_url(url, params)
+    logger.debug(f"get_prices url = {request.url}")
     response_json = requests.post(request.url).json()
     status = response_json['pb_get_prices']['status']
     if status == "error":

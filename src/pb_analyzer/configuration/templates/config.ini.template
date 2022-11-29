@@ -11,3 +11,11 @@ db_file =
 [LOGGING]
 file_name =
 rotation =
+
+[MAIL]
+server =
+port =
+user =
+password =
+sender =
+recipient =

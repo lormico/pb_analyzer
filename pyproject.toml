@@ -5,9 +5,10 @@ dependencies = [
     "requests>=2.28",
     "loguru~=0.6.0",
     "sqlalchemy~=1.4",
-    "urllib3>=1.26"
+    "urllib3>=1.26",
+    "appdirs>=1.4.4",
 ]
-requires-python = ">=3.10"
+requires-python = ">=3.9"
 
 [project.scripts]
 pb_analyzer = "pb_analyzer.__main__:main"
