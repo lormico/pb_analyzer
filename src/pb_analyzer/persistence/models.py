@@ -40,5 +40,5 @@ class Price(Base):
 
 class Metadata(Base):
     __tablename__ = "metadata"
-    key = Column(String, primary_key=True)
+    k = Column(String, primary_key=True)
     value = Column(String)

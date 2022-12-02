@@ -21,36 +21,32 @@ def main():
 
     try:
         db_session = get_db_session(config["PERSISTENCE"]["db_file"])
-        last_updated = db_session.query(Metadata.value).filter(Metadata.key == "last_updated").scalar()
+        last_updated = db_session.query(Metadata.value).filter(Metadata.k == "last_updated").scalar()
         if last_updated:
             last_updated = datetime.datetime.strptime(last_updated, "%Y-%m-%d %H:%M:%S")
             logger.debug(f"Last update: {last_updated}")
 
-        # Look for station updates 6 hours since last update
-        # May produce duplicates on db, but it's ok, they will be handled
-        # Doing this since the API wouldn't return data if filtered too strictly
         stations = get_stations(config["SEARCH"]["min_lat"],
                                 config["SEARCH"]["min_long"],
                                 config["SEARCH"]["max_lat"],
                                 config["SEARCH"]["max_long"],
-                                last_updated - datetime.timedelta(hours=6))
+                                last_updated)
         logger.info(f"Found {len(stations)} stations")
         if stations:
             upsert_stations(db_session, stations)
 
-        # Same as above
         prices = get_prices(config["SEARCH"]["min_lat"],
                             config["SEARCH"]["min_long"],
                             config["SEARCH"]["max_lat"],
                             config["SEARCH"]["max_long"],
-                            last_updated - datetime.timedelta(hours=6))
+                            last_updated)
         logger.info(f"Found {len(prices)} prices")
         if prices:
             insert_prices(db_session, prices)
 
         upsert_metadata(db_session, {"last_updated": datetime.datetime.now().strftime("%Y-%m-%d %H:%M:%S")})
 
-        # db_session.commit()
+        db_session.commit()
         logger.info("Updated the database")
     except Exception:
         logger.exception("Exception while running the main method")

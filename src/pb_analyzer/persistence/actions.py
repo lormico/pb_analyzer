@@ -52,7 +52,7 @@ def insert_prices(session: Session, prices: List[JsonObject]):
 
 
 def upsert_metadata(session: Session, metadata: Dict):
-    values = [{"key": k, "value": v} for k, v in metadata.items()]
+    values = [{"k": k, "value": v} for k, v in metadata.items()]
     statement = insert(Metadata).values(values)
-    statement = statement.on_conflict_do_update(index_elements=['key'], set_=statement.excluded)
+    statement = statement.on_conflict_do_update(index_elements=['k'], set_=statement.excluded)
     session.execute(statement)
